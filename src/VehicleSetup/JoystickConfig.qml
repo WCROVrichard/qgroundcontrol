@@ -498,6 +498,17 @@ SetupPage {
                             }
 
                             QGCCheckBox {
+                                id:         joystickCircleCorrection
+                                checked:    _activeVehicle.joystickMode != 0
+                                text:       qsTr("Enable circle correction")
+
+                                Component.onCompleted: checked = _activeJoystick.circleCorrection
+                                onClicked: {
+                                    _activeJoystick.circleCorrection = checked
+                                }
+                            }
+
+                            QGCCheckBox {
                                 id:         advancedSettings
                                 checked:    _activeVehicle.joystickMode != 0
                                 text:       qsTr("Advanced settings (careful!)")
