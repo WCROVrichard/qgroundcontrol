@@ -382,6 +382,7 @@ public:
     Q_PROPERTY(Fact* altitudeRelative   READ altitudeRelative   CONSTANT)
     Q_PROPERTY(Fact* altitudeAMSL       READ altitudeAMSL       CONSTANT)
     Q_PROPERTY(Fact* flightDistance     READ flightDistance     CONSTANT)
+    Q_PROPERTY(Fact* altError           READ altError           CONSTANT)
 
     Q_PROPERTY(FactGroup* gps         READ gpsFactGroup         CONSTANT)
     Q_PROPERTY(FactGroup* battery     READ batteryFactGroup     CONSTANT)
@@ -644,6 +645,7 @@ public:
     Fact* altitudeRelative  (void) { return &_altitudeRelativeFact; }
     Fact* altitudeAMSL      (void) { return &_altitudeAMSLFact; }
     Fact* flightDistance    (void) { return &_flightDistanceFact; }
+    Fact* altError          (void) { return &_altErrorFact; }
 
     FactGroup* gpsFactGroup         (void) { return &_gpsFactGroup; }
     FactGroup* batteryFactGroup     (void) { return &_batteryFactGroup; }
@@ -853,6 +855,7 @@ private:
     void _loadSettings(void);
     void _saveSettings(void);
     void _startJoystick(bool start);
+    void _handleNavOutput(mavlink_message_t& message);
     void _handleHomePosition(mavlink_message_t& message);
     void _handleHeartbeat(mavlink_message_t& message);
     void _handleRadioStatus(mavlink_message_t& message);
@@ -1056,6 +1059,7 @@ private:
     Fact _altitudeAMSLFact;
     Fact _flightDistanceFact;
     Fact _flightTimeFact;
+    Fact _altErrorFact;
 
     VehicleGPSFactGroup         _gpsFactGroup;
     VehicleBatteryFactGroup     _batteryFactGroup;

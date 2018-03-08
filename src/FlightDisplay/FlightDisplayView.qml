@@ -224,7 +224,6 @@ QGCView {
             _flightVideo.state = "unpopup"
             videoWindow.visible = false
         }
-
     }
 
     QGCMapPalette { id: mapPal; lightColors: _mainIsMap ? _flightMap.isSatelliteMap : true }
@@ -232,6 +231,22 @@ QGCView {
     QGCViewPanel {
         id:             _panel
         anchors.fill:   parent
+
+        Item {
+            id: seaViewCustomOverlay
+            anchors.fill: parent
+            z: 9999
+            Rectangle {
+
+                height: 30
+                width: height
+                anchors.centerIn: parent
+                color: "red"
+                Text {
+                    text: "Depth setpoint: " + _activeVehicle.altitudeRelative.rawValue + _activeVehicle.altError.rawValue
+                }
+            }
+        }
 
         //-- Map View
         //   For whatever reason, if FlightDisplayViewMap is the _panel item, changing

@@ -518,6 +518,9 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
     }
 
     switch (message.msgid) {
+    case MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT:
+        _handleNavOutput(message);
+        break;
     case MAVLINK_MSG_ID_HOME_POSITION:
         _handleHomePosition(message);
         break;
@@ -978,6 +981,13 @@ void Vehicle::_setHomePosition(QGeoCoordinate& homeCoord)
         _homePosition = homeCoord;
         emit homePositionChanged(_homePosition);
     }
+}
+
+void Vehicle::_handleNavOutput(mavlink_message_t& message) {
+    mavlink_nav_controller_output_t navOutput;
+    mavlink_msg_nav_controller_output_decode(&message, &navOutput);
+
+    _altErrorFact.setRawValue(navOutput.alt_error);
 }
 
 void Vehicle::_handleHomePosition(mavlink_message_t& message)
