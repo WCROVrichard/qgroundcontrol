@@ -11,6 +11,7 @@
 #include "QGCApplication.h"
 #include "QGCCorePlugin.h"
 
+
 QGCPositionManager::QGCPositionManager(QGCApplication* app, QGCToolbox* toolbox)
     : QGCTool(app, toolbox)
     , _updateInterval(0)
@@ -23,25 +24,37 @@ QGCPositionManager::~QGCPositionManager()
 {
     delete(_simulatedSource);
     delete(_nmeaSource);
+    delete(_subsonusSource);
 }
 
 void QGCPositionManager::setToolbox(QGCToolbox *toolbox)
 {
    QGCTool::setToolbox(toolbox);
+
    //-- First see if plugin provides a position source
    _defaultSource = toolbox->corePlugin()->createPositionSource(this);
+
    if(!_defaultSource) {
        //-- Otherwise, create a default one
        _defaultSource = QGeoPositionInfoSource::createDefaultSource(this);
-   }
-   _simulatedSource = new SimulatedPosition();
+       }
 
+   // set SubSonus position source
+   _subsonusSource = new SubsonusPosition();
+   if (_subsonusSource != nullptr) {
+          setPositionSource(QGCPositionManager::SubSonus);
+         qDebug() << "set subsonus as position source";
+  }
+
+   // _simulatedSource = new SimulatedPosition();
+   // qDebug() << "created sim source";
    // Enable this to get a simulated target on desktop
-   // if (_defaultSource == nullptr) {
-   //     _defaultSource = _simulatedSource;
-   // }
+   //  if (_defaultSource == nullptr) {
+     //  _defaultSource = _simulatedSource;
+    //   qDebug() << "set simulated as default pos source";
+    // }
 
-   setPositionSource(QGCPositionSource::InternalGPS);
+    // setPositionSource(QGCPositionSource::InternalGPS);
 }
 
 void QGCPositionManager::setNmeaSourceDevice(QIODevice* device)
@@ -56,6 +69,8 @@ void QGCPositionManager::setNmeaSourceDevice(QIODevice* device)
 
 void QGCPositionManager::positionUpdated(const QGeoPositionInfo &update)
 {
+    // qDebug() << "position info from manager: " << update;
+
     emit lastPositionUpdated(update.isValid(), QVariant::fromValue(update.coordinate()));
     emit positionInfoUpdated(update);
 }
@@ -80,6 +95,9 @@ void QGCPositionManager::setPositionSource(QGCPositionManager::QGCPositionSource
         break;
     case QGCPositionManager::NmeaGPS:
         _currentSource = _nmeaSource;
+        break;
+    case QGCPositionManager::SubSonus:
+        _currentSource = _subsonusSource;
         break;
     case QGCPositionManager::InternalGPS:
     default:        

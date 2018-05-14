@@ -29,6 +29,7 @@
 #include "QGCCorePlugin.h"
 #include "QGCOptions.h"
 #include "SettingsManager.h"
+#include "subsonusmanager.h"
 #include "QGCApplication.h"
 
 #if defined(QGC_CUSTOM_BUILD)
@@ -55,7 +56,9 @@ QGCToolbox::QGCToolbox(QGCApplication* app)
     , _videoManager(NULL)
     , _mavlinkLogManager(NULL)
     , _corePlugin(NULL)
+    , _subsonusManager(NULL)
     , _settingsManager(NULL)
+
 {
     // SettingsManager must be first so settings are available to any subsequent tools
     _settingsManager =          new SettingsManager(app, this);
@@ -80,6 +83,8 @@ QGCToolbox::QGCToolbox(QGCApplication* app)
     _followMe =                 new FollowMe                (app, this);
     _videoManager =             new VideoManager            (app, this);
     _mavlinkLogManager =        new MAVLinkLogManager       (app, this);
+    _subsonusManager =          new SubSonusManager         (app, this);
+
 }
 
 void QGCToolbox::setChildToolboxes(void)
@@ -106,6 +111,7 @@ void QGCToolbox::setChildToolboxes(void)
     _qgcPositionManager->setToolbox(this);
     _videoManager->setToolbox(this);
     _mavlinkLogManager->setToolbox(this);
+    _subsonusManager->setToolbox(this);
 }
 
 void QGCToolbox::_scanAndLoadPlugins(QGCApplication* app)

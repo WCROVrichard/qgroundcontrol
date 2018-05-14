@@ -113,6 +113,7 @@ public:
     // Overrides from FirmwarePlugin
     bool    isCapable (const Vehicle *vehicle, FirmwareCapabilities capabilities) final;
     void    guidedModeGotoLocation(Vehicle* vehicle, const QGeoCoordinate& gotoCoord) final;
+    void    guidedModeChangeAltitude(Vehicle* vehicle, double altitudeChange) final;
     int manualControlReservedButtonCount(void) final;
 
     int defaultJoystickTXMode(void) final { return 3; }

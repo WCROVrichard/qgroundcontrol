@@ -1,4 +1,4 @@
-/****************************************************************************
+ /****************************************************************************
  *
  *   (c) 2009-2016 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
  *
@@ -17,6 +17,8 @@ import QtPositioning            5.3
 import QtMultimedia             5.5
 import QtQuick.Layouts          1.2
 import QtQuick.Window           2.2
+import QtQuick.Extras           1.4
+
 
 import QGroundControl               1.0
 import QGroundControl.FlightDisplay 1.0
@@ -27,6 +29,7 @@ import QGroundControl.Palette       1.0
 import QGroundControl.Vehicle       1.0
 import QGroundControl.Controllers   1.0
 import QGroundControl.FactSystem    1.0
+import QGroundControl.SubSonusManager   1.0
 
 /// Flight Display View
 QGCView {
@@ -44,6 +47,7 @@ QGCView {
     property var    _geoFenceController:    _planMasterController.geoFenceController
     property var    _rallyPointController:  _planMasterController.rallyPointController
     property var    _activeVehicle:         QGroundControl.multiVehicleManager.activeVehicle
+    property var    _activeVehicleCoordinate:   _activeVehicle ? _activeVehicle.coordinate : QtPositioning.coordinate()
     property var    _videoReceiver:         QGroundControl.videoManager.videoReceiver
     property bool   _recordingVideo:        _videoReceiver && _videoReceiver.recording
     property bool   _mainIsMap:             QGroundControl.videoManager.hasVideo ? QGroundControl.loadBoolGlobalSetting(_mainIsMapKey,  false) : true
@@ -232,71 +236,260 @@ QGCView {
         id:             _panel
         anchors.fill:   parent
 
+        // CUSTOM SECTION FOR SeaView DATA OVERLAY and CONTROLS
+
         Item {
-            id: seaViewCustomOverlay
+
+            id: seaViewCustomOverlayTEST
             anchors.fill: parent
-            z: 9999
+            z: 9997
+
             Rectangle {
 
-                height: 30
-                width: height
-                anchors.centerIn: parent
-                color: "red"
-                Text {
-                    text: "Depth setpoint: " + _activeVehicle.altitudeRelative.rawValue + _activeVehicle.altError.rawValue
-                }
-            }
-        }
+                height: 60
+                width: 700
+                anchors.top:             parent.top
+                anchors.horizontalCenter:   parent.horizontalCenter
+                anchors.topMargin:  ScreenTools.toolbarHeight + (_margins * 2)
+                color:  "transparent"
+                Layout.fillWidth: true
 
-        //-- Map View
-        //   For whatever reason, if FlightDisplayViewMap is the _panel item, changing
-        //   width/height has no effect.
-        Item {
-            id: _flightMapContainer
-            z:  _mainIsMap ? _panel.z + 1 : _panel.z + 2
-            anchors.left:   _panel.left
-            anchors.bottom: _panel.bottom
-            visible:        _mainIsMap || _isPipVisible
-            width:          _mainIsMap ? _panel.width  : _pipSize
-            height:         _mainIsMap ? _panel.height : _pipSize * (9/16)
-            states: [
-                State {
-                    name:   "pipMode"
-                    PropertyChanges {
-                        target:             _flightMapContainer
-                        anchors.margins:    ScreenTools.defaultFontPixelHeight
-                    }
-                },
-                State {
-                    name:   "fullMode"
-                    PropertyChanges {
-                        target:             _flightMapContainer
-                        anchors.margins:    0
-                    }
-                }
-            ]
-            FlightDisplayViewMap {
-                id:                         _flightMap
-                anchors.fill:               parent
-                planMasterController:       masterController
-                guidedActionsController:    _guidedController
-                flightWidgets:              flightDisplayViewWidgets
-                rightPanelWidth:            ScreenTools.defaultFontPixelHeight * 9
-                qgcView:                    root
-                scaleState:                 (_mainIsMap && flyViewOverlay.item) ? (flyViewOverlay.item.scaleState ? flyViewOverlay.item.scaleState : "bottomMode") : "bottomMode"
-            }
-        }
+                GridLayout{
+                    id: subsonusInfoPane
+                    columns: 3
+                    columnSpacing: 20
+                    rows: 2
+                    flow: GridLayout.TopToBottom
+                    Layout.margins: 5
+                    anchors.fill: parent
 
-        //-- Video View
+
+                    QGCLabel {
+                        text: "ReefSweeper Depth:"
+
+                    }
+                    Rectangle {
+                        color:  qgcPal.window
+                        height: 30
+                        width: 80
+                        border.color:   qgcPal.mapWidgetBorderLight
+                        border.width:   1
+                        radius:         1
+                        QGCLabel{
+                            text: "  " + _activeVehicle.altitudeRelative.rawValue
+                            font.pointSize:         ScreenTools.largeFontPointSize
+                        }
+                    }
+
+
+                    QGCLabel {
+                        text: "Dive Rate:"
+
+                    }
+                    Rectangle {
+                        color:  qgcPal.window
+                        height: 30
+                        width: 80
+                        border.color:   qgcPal.mapWidgetBorderLight
+                        border.width:   1
+                        radius:         1
+                        QGCLabel{
+                            text: "  " + Math.round(_activeVehicle.climbRate.rawValue * 10) / 10
+                            font.pointSize:         ScreenTools.largeFontPointSize
+                        }
+                    }
+
+                    QGCLabel{
+                        text: "Range:"
+
+                    }
+                    Rectangle {
+                        color:  qgcPal.window
+                        height: 30
+                        width: 80
+                        border.color:   qgcPal.mapWidgetBorderLight
+                        border.width:   1
+                        radius:         1
+                        QGCLabel{
+                            text: "  " + (QGroundControl.subsonusManager.range).toFixed(1)
+                            font.pointSize:         ScreenTools.largeFontPointSize
+                        }
+                    }
+
+
+                    QGCLabel{
+                        text: "COG: " + (SubSonusManager.course.valueOf()).toFixed(0)
+                        font.pointSize:         ScreenTools.largeFontPointSize
+
+                    }
+                    QGCLabel{
+                        text: "SOG: " + (SubSonusManager.trueVel.rawValue).toFixed(1)
+                        font.pointSize:         ScreenTools.largeFontPointSize
+
+                    }
+
+
+
+                } // end grid layout
+            } // end rectangle
+        } // end item
+
         Item {
-            id:             _flightVideo
-            z:              _mainIsMap ? _panel.z + 2 : _panel.z + 1
-            width:          !_mainIsMap ? _panel.width  : _pipSize
-            height:         !_mainIsMap ? _panel.height : _pipSize * (9/16)
-            anchors.left:   _panel.left
-            anchors.bottom: _panel.bottom
-            visible:        QGroundControl.videoManager.hasVideo && (!_mainIsMap || _isPipVisible)
-            states: [
+            id: seaViewCustomControlPanel
+            anchors.fill: parent
+            z: 9998
+
+            Rectangle {
+
+                height: 210
+                width: 190
+                anchors.right:             parent.right
+                anchors.rightMargin: ScreenTools.defaultFontPixelWidth
+                anchors.bottom:             parent.bottom
+                anchors.bottomMargin:  ScreenTools.toolbarHeight + (_margins * 4)
+                border.color:   qgcPal.mapWidgetBorderLight
+                border.width:   1
+                radius:         ScreenTools.defaultFontPixelHeight / 2
+                color:          qgcPal.window
+
+                GridLayout {
+                    id:  seaviewIndicatorsColumn
+                    columns: 3
+                    flow: GridLayout.TopToBottom
+                    rows: 5
+
+                    QGCLabel {
+                        id:                     titleText
+                        color:                  "white"
+                        font.pointSize:         ScreenTools.largeFontPointSize
+                        text: "Auto Functions"
+                        Layout.columnSpan: 3
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+                    StatusIndicator {
+                        id: monualhorizontal
+                        Layout.alignment: Qt.AlignHCenter
+                        color: "green"
+                        Layout.topMargin: 10
+                        active: if (_activeVehicle.flightMode == "Guided") { false }
+                                else  if (_activeVehicle.flightMode == "Auto") { false }
+                                else { true }
+                    }
+                    QGCLabel {
+                        text: "Manual\nHorizontal"
+                        Layout.alignment: Qt.AlignHCenter
+
+                    }
+
+                    StatusIndicator {
+                        id: manualvertical
+                        color: "green"
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.topMargin: 10
+                        active: if (_activeVehicle.flightMode == "Manual") {true}
+                                else  if (_activeVehicle.flightMode == "Stabilize") {true}
+                                else { false }
+                    }
+                    QGCLabel {
+                        text: "Manual\nVertical"
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+
+                    StatusIndicator {
+                        id: autohead
+                        color: "green"
+                        Layout.topMargin: 10
+                        Layout.alignment: Qt.AlignHCenter
+                        active: if (_activeVehicle.flightMode == "Manual"){ false }
+                                    else { true }
+                    }
+                    QGCLabel {
+                        text: "Auto\nHeading"
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+
+                    StatusIndicator {
+                        id: autodepth
+                        color: "green"
+                        Layout.topMargin: 10
+                        Layout.alignment: Qt.AlignHCenter
+                        active: if (_activeVehicle.flightMode == "Manual") { false }
+                                else if (_activeVehicle.flightMode == "Stabilize") { false }
+                                else { true }
+                    }
+                    QGCLabel {
+                        text: "Auto\nVertical"
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+
+                    StatusIndicator {
+                        id: stationkeeping
+                        color: "green"
+                        Layout.topMargin: 10
+                        Layout.alignment: Qt.AlignHCenter
+                        active: if (_activeVehicle.flightMode == "Position Hold"){ true }
+                                    else { false }
+                    }
+                    QGCLabel {
+                        text: "Station\nKeeping"
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+
+
+                    }
+             }
+       }
+
+
+   //-- Map View
+   //   For whatever reason, if FlightDisplayViewMap is the _panel item, changing
+   //   width/height has no effect.
+   Item {
+       id: _flightMapContainer
+       z:  _mainIsMap ? _panel.z + 1 : _panel.z + 2
+       anchors.left:   _panel.left
+       anchors.bottom: _panel.bottom
+       visible:        _mainIsMap || _isPipVisible
+       width:          _mainIsMap ? _panel.width  : _pipSize
+       height:         _mainIsMap ? _panel.height : _pipSize * (9/16)
+       states: [
+           State {
+               name:   "pipMode"
+               PropertyChanges {
+                   target:             _flightMapContainer
+                   anchors.margins:    ScreenTools.defaultFontPixelHeight
+               }
+           },
+           State {
+               name:   "fullMode"
+               PropertyChanges {
+                   target:             _flightMapContainer
+                   anchors.margins:    0
+               }
+           }
+       ]
+       FlightDisplayViewMap {
+           id:                         _flightMap
+           anchors.fill:               parent
+           planMasterController:       masterController
+           guidedActionsController:    _guidedController
+           flightWidgets:              flightDisplayViewWidgets
+           rightPanelWidth:            ScreenTools.defaultFontPixelHeight * 9
+           qgcView:                    root
+           scaleState:                 (_mainIsMap && flyViewOverlay.item) ? (flyViewOverlay.item.scaleState ? flyViewOverlay.item.scaleState : "bottomMode") : "bottomMode"
+       }
+   }
+
+   //-- Video View
+   Item {
+       id:             _flightVideo
+       z:              _mainIsMap ? _panel.z + 2 : _panel.z + 1
+       width:          !_mainIsMap ? _panel.width  : _pipSize
+       height:         !_mainIsMap ? _panel.height : _pipSize * (9/16)
+       anchors.left:   _panel.left
+       anchors.bottom: _panel.bottom
+       visible:        QGroundControl.videoManager.hasVideo && (!_mainIsMap || _isPipVisible)
+       states: [
                 State {
                     name:   "pipMode"
                     PropertyChanges {
@@ -613,7 +806,9 @@ QGCView {
             property Fact _virtualJoystick: QGroundControl.settingsManager.appSettings.virtualJoystick
         }
 
-        ToolStrip {
+        // POSSIBLY HIDING left-side tool strip for SeaView build
+
+  /*      ToolStrip {
             visible:            _activeVehicle ? _activeVehicle.guidedModeSupported : true
             id:                 toolStrip
             anchors.leftMargin: ScreenTools.defaultFontPixelWidth
@@ -695,14 +890,7 @@ QGCView {
                     iconSource: "/res/action.svg",
                     action:     -1
                 },
-                /*
-                  No firmware support any smart shots yet
-                {
-                    name:       qsTr("Smart"),
-                    iconSource: "/qmlimages/MapCenter.svg",
-                    action:     -1
-                },
-                */
+
             ]
 
             onClicked: {
@@ -720,7 +908,7 @@ QGCView {
                     _guidedController.confirmAction(action)
                 }
             }
-        }
+        }  */
 
         GuidedActionsController {
             id:                 guidedActionsController
@@ -796,5 +984,5 @@ QGCView {
         }
     }
 
-
 }
+

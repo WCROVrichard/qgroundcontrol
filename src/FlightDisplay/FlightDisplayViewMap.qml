@@ -8,7 +8,7 @@
  ****************************************************************************/
 
 
-import QtQuick          2.3
+import QtQuick          2.7
 import QtQuick.Controls 1.2
 import QtLocation       5.3
 import QtPositioning    5.3
@@ -119,6 +119,46 @@ FlightMap {
         }
     }
 
+    function sendGoToFromKeyboard(button) {
+        if ((guidedActionsController.showGotoLocation && !guidedActionsController.guidedUIVisible)
+                       || (_activeVehicle.sub && _activeVehicle.guidedMode)) {
+            var newHeading = _activeVehicle.heading.rawValue
+            console.log("key command, heading is " + newHeading)
+            console.log("current depth is " + _activeVehicle.altitudeRelative.rawValue )
+            if (button === "up") {
+                _gotoHereCoordinate = (_activeVehicleCoordinate.atDistanceAndAzimuth(.2, newHeading))
+                guidedActionsController.executeAction(guidedActionsController.actionGoto, _gotoHereCoordinate)
+            }
+            if (button === "down") {
+                newHeading -= 180
+                if (newHeading < 0) { newHeading += 360 }
+                _gotoHereCoordinate = (_activeVehicleCoordinate.atDistanceAndAzimuth(.2, newHeading))
+                guidedActionsController.executeAction(guidedActionsController.actionGoto, _gotoHereCoordinate)
+            }
+            if (button === "right") {
+                newHeading += 90
+                if (newHeading > 360) { newHeading -= 360 }
+                _gotoHereCoordinate = (_activeVehicleCoordinate.atDistanceAndAzimuth(.2, newHeading))
+                guidedActionsController.executeAction(guidedActionsController.actionGoto, _gotoHereCoordinate)
+            }
+            if (button === "left") {
+                newHeading -= 90
+                if (newHeading < 0) { newHeading += 360 }
+                _gotoHereCoordinate = (_activeVehicleCoordinate.atDistanceAndAzimuth(.2, newHeading))
+                guidedActionsController.executeAction(guidedActionsController.actionGoto, _gotoHereCoordinate)
+            }
+
+            if (button === "pageup") {
+                guidedActionsController.executeAction(guidedActionsController.actionChangeAlt, .2)
+            }
+            if (button === "pagedown") {
+                guidedActionsController.executeAction(guidedActionsController.actionChangeAlt, -.2)
+            }
+
+
+        }
+    }
+
     Timer {
         id:         panRecenterTimer
         interval:   10000
@@ -162,7 +202,7 @@ FlightMap {
         usePlannedHomePosition:     false
         planMasterController:       _planMasterController
 
-        property real leftToolWidth:    toolStrip.x + toolStrip.width
+        // property real leftToolWidth:    toolStrip.x + toolStrip.width
     }
 
     // Add trajectory points to the map
@@ -241,12 +281,11 @@ FlightMap {
         z:              QGroundControl.zOrderMapItems
         anchorPoint.x:  sourceItem.anchorPointX
         anchorPoint.y:  sourceItem.anchorPointY
-
         sourceItem: MissionItemIndexLabel {
-            checked:    true
-            index:      -1
-            label:      qsTr("Goto here", "Goto here waypoint")
+            id: gotoMarker
+            index: -1
         }
+
     }    
 
     // Camera trigger points
@@ -267,10 +306,26 @@ FlightMap {
             if ((guidedActionsController.showGotoLocation && !guidedActionsController.guidedUIVisible)
                || (_activeVehicle.sub && _activeVehicle.guidedMode)) {
                 _gotoHereCoordinate = flightMap.toCoordinate(Qt.point(mouse.x, mouse.y), false /* clipToViewPort */)
-                guidedActionsController.confirmAction(guidedActionsController.actionGoto, _gotoHereCoordinate)
-            }
+                guidedActionsController.executeAction(guidedActionsController.actionGoto, _gotoHereCoordinate)  // was confirmAction, changed to execute
+
+             }
         }
     }
+
+   // Custom area for SeaView ReefSweeper click arrow keys to make GoTo waypoints
+    Item {
+        id: keyboardCatcher
+        anchors.fill: parent
+        focus: true
+        Keys.onLeftPressed:  sendGoToFromKeyboard("left")
+        Keys.onRightPressed: sendGoToFromKeyboard("right")
+        Keys.onUpPressed: sendGoToFromKeyboard("up")
+        Keys.onDownPressed: sendGoToFromKeyboard("down")
+        Keys.onPressed: if (event.key === Qt.Key_PageUp) { sendGoToFromKeyboard("pageup") }
+            else if (event.key === Qt.Key_PageDown) { sendGoToFromKeyboard("pagedown") }
+        Component.onCompleted: forceActiveFocus()
+    }
+
 
     MapScale {
         id:                     mapScale

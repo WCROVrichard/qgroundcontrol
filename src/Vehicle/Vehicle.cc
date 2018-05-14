@@ -2123,10 +2123,10 @@ void Vehicle::startMission(void)
 
 void Vehicle::guidedModeGotoLocation(const QGeoCoordinate& gotoCoord)
 {
-    if (!guidedModeSupported()) {
+    /* if (!guidedModeSupported()) {
         qgcApp()->showMessage(guided_mode_not_supported_by_vehicle);
         return;
-    }
+    }  */
     if (!coordinate().isValid()) {
         return;
     }
@@ -2140,10 +2140,10 @@ void Vehicle::guidedModeGotoLocation(const QGeoCoordinate& gotoCoord)
 
 void Vehicle::guidedModeChangeAltitude(double altitudeChange)
 {
-    if (!guidedModeSupported()) {
+    /* if (!guidedModeSupported()) {
         qgcApp()->showMessage(guided_mode_not_supported_by_vehicle);
         return;
-    }
+    } */
     _firmwarePlugin->guidedModeChangeAltitude(this, altitudeChange);
 }
 

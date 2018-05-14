@@ -15,10 +15,13 @@
 
 SimulatedPosition::simulated_motion_s SimulatedPosition::_simulated_motion[5] = {{0,250},{0,0},{0, -250},{-250, 0},{0,0}};
 
+// SeaView test tank location: 42.341440, -83.875043
+// default location 47.3977420*1e7, 8.5455941*1e7 outside of Zurich
+
 SimulatedPosition::SimulatedPosition()
     : QGeoPositionInfoSource(NULL),
-      lat_int(47.3977420*1e7),
-      lon_int(8.5455941*1e7),
+      lat_int(42.341440),
+      lon_int(-83.875043),
       _step_cnt(0),
       _simulate_motion_index(0),
       _simulate_motion(true),
@@ -43,7 +46,7 @@ SimulatedPosition::PositioningMethods SimulatedPosition::supportedPositioningMet
 
 int SimulatedPosition::minimumUpdateInterval() const
 {
-    return 1000;
+    return 2000;
 }
 
 void SimulatedPosition::startUpdates()

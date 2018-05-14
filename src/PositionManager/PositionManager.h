@@ -16,6 +16,7 @@
 
 #include "QGCToolbox.h"
 #include "SimulatedPosition.h"
+#include "subsonusposition.h"
 
 class QGCPositionManager : public QGCTool {
     Q_OBJECT
@@ -29,7 +30,8 @@ public:
         Simulated,
         InternalGPS,
         Log,
-        NmeaGPS
+        NmeaGPS,
+        SubSonus
     };
 
     void setPositionSource(QGCPositionSource source);
@@ -53,4 +55,5 @@ private:
     QGeoPositionInfoSource * _defaultSource;
     QNmeaPositionInfoSource * _nmeaSource;
     QGeoPositionInfoSource * _simulatedSource;
+    QGeoPositionInfoSource * _subsonusSource;
 };

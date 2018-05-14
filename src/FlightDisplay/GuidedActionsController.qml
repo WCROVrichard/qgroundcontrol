@@ -229,16 +229,20 @@ Item {
             confirmDialog.hideTrigger = Qt.binding(function() { return !showRTL })
             break;
         case actionChangeAlt:
-            confirmDialog.title = changeAltTitle
+            _activeVehicle.guidedModeChangeAltitude(actionData)
+            /* confirmDialog.title = changeAltTitle
             confirmDialog.message = changeAltMessage
             confirmDialog.hideTrigger = Qt.binding(function() { return !showChangeAlt })
             altitudeSlider.reset()
-            altitudeSlider.visible = true
+            altitudeSlider.visible = true */
             break;
         case actionGoto:
+            _activeVehicle.guidedModeGotoLocation(actionData)
+            /*  TEMP COMMENTING OUT CONFIRMATION FOR GOTO COMMANDS
             confirmDialog.title = gotoTitle
             confirmDialog.message = gotoMessage
             confirmDialog.hideTrigger = Qt.binding(function() { return !showGotoLocation })
+            */
             break;
         case actionSetWaypoint:
             confirmDialog.title = setWaypointTitle

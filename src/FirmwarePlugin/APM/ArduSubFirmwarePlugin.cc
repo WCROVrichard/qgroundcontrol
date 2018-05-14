@@ -180,8 +180,43 @@ void ArduSubFirmwarePlugin::guidedModeGotoLocation(Vehicle* vehicle, const QGeoC
 
     QGeoCoordinate coordWithAltitude = gotoCoord;
     coordWithAltitude.setAltitude(vehicle->altitudeRelative()->rawValue().toDouble());
-    vehicle->missionManager()->writeArduPilotGuidedMissionItem(coordWithAltitude, false /* altChangeOnly */);
+    qDebug() << "plugin setting goTo point altitude to: " << vehicle->altitudeRelative()->rawValue().toDouble();
+    vehicle->missionManager()->writeArduPilotGuidedMissionItem(coordWithAltitude, false /* not altChangeOnly */);
 }
+
+void ArduSubFirmwarePlugin::guidedModeChangeAltitude(Vehicle* vehicle, double altitudeChange)
+{
+    if (qIsNaN(vehicle->altitudeRelative()->rawValue().toDouble())) {
+        qgcApp()->showMessage(QStringLiteral("Unable to change altitude, vehicle altitude not known."));
+        return;
+    }
+
+    // don't think we need this, will only be called in guided mode
+    // setGuidedMode(vehicle, true);
+    qDebug() << "plugin setting altitude change to: " << altitudeChange;
+    mavlink_message_t msg;
+    mavlink_set_position_target_local_ned_t cmd;
+
+    memset(&cmd, 0, sizeof(cmd));
+
+    cmd.target_system = vehicle->id();
+    cmd.target_component = vehicle->defaultComponentId();
+    cmd.coordinate_frame = MAV_FRAME_LOCAL_OFFSET_NED;
+    cmd.type_mask = 0xFFF8; // Only x/y/z valid
+    cmd.x = 0.0f;
+    cmd.y = 0.0f;
+    cmd.z = -(altitudeChange);
+
+    MAVLinkProtocol* mavlink = qgcApp()->toolbox()->mavlinkProtocol();
+    mavlink_msg_set_position_target_local_ned_encode_chan(mavlink->getSystemId(),
+                                                          mavlink->getComponentId(),
+                                                          vehicle->priorityLink()->mavlinkChannel(),
+                                                          &msg,
+                                                          &cmd);
+
+    vehicle->sendMessageOnLink(vehicle->priorityLink(), msg);
+}
+
 
 int ArduSubFirmwarePlugin::manualControlReservedButtonCount(void)
 {

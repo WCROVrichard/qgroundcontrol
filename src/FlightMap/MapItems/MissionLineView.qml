@@ -19,7 +19,7 @@ import QGroundControl.Palette   1.0
 MapItemView {
     id: _root
 
-    property bool homePositionValid: true   ///< true: show home position, false: don't show home position
+    property bool homePositionValid: false   ///< true: show home position, false: don't show home position
 
     delegate: MapPolyline {
         line.width: 3

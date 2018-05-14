@@ -31,6 +31,7 @@ class QGCPositionManager;
 class VideoManager;
 class MAVLinkLogManager;
 class QGCCorePlugin;
+class SubSonusManager;
 class SettingsManager;
 
 /// This is used to manage all of our top level services/tools
@@ -55,6 +56,7 @@ public:
     VideoManager*               videoManager(void)              { return _videoManager; }
     MAVLinkLogManager*          mavlinkLogManager(void)         { return _mavlinkLogManager; }
     QGCCorePlugin*              corePlugin(void)                { return _corePlugin; }
+    SubSonusManager*            subsonusManager(void)           { return _subsonusManager; }
     SettingsManager*            settingsManager(void)           { return _settingsManager; }
 
 #ifndef __mobile__
@@ -85,6 +87,7 @@ private:
     VideoManager*               _videoManager;
     MAVLinkLogManager*          _mavlinkLogManager;
     QGCCorePlugin*              _corePlugin;
+    SubSonusManager*            _subsonusManager;
     SettingsManager*            _settingsManager;
 
     friend class QGCApplication;

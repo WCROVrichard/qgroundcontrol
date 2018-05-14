@@ -46,7 +46,7 @@
         <file alias="Airframe/HelicopterCoaxial">src/AutoPilotPlugins/Common/Images/HelicopterCoaxial.svg</file>
         <file alias="wifi.svg">src/AutoPilotPlugins/Common/Images/wifi.svg</file>
         <file alias="arrow-down.png">src/QmlControls/arrow-down.png</file>
-		<file alias="camera.svg">resources/camera.svg</file>
+        <file alias="camera.svg">resources/camera.svg</file>
         <file alias="check.png">src/QmlControls/check.png</file>
         <file alias="FirmwareUpgradeIcon.png">src/VehicleSetup/FirmwareUpgradeIcon.png</file>
         <file alias="FlightModesComponentIcon.png">src/AutoPilotPlugins/PX4/Images/FlightModesComponentIcon.png</file>
@@ -169,6 +169,7 @@
         <file alias="APM/BrandImageSub">src/FirmwarePlugin/APM/APMBrandImageSub.png</file>
         <file alias="PX4/BrandImage">src/FirmwarePlugin/PX4/PX4BrandImage.png</file>
         <file alias="subVehicleArrowOpaque.png">src/FlightMap/Images/sub.png</file>
+        <file alias="Xspot.svg">src/FlightMap/Images/XspotW.svg</file>
     </qresource>
     <qresource prefix="/res">
         <file alias="action.svg">resources/action.svg</file>
@@ -190,7 +191,7 @@
         <file alias="Play">resources/Play.svg</file>
         <file alias="PowerButton">resources/PowerButton.svg</file>
         <file alias="QGCLogoBlack">resources/QGCLogoBlack.svg</file>
-		<file alias="QGCLogoFull">resources/QGCLogoFull.svg</file>
+        <file alias="QGCLogoFull">resources/QGCLogoFull.svg</file>
         <file alias="QGCLogoWhite">resources/QGCLogoWhite.svg</file>
         <file alias="QGroundControlConnect">resources/QGroundControlConnect.svg</file>
         <file alias="rtl.svg">resources/rtl.svg</file>
@@ -206,6 +207,7 @@
         <file alias="XDelete.svg">resources/XDelete.svg</file>
         <file alias="XDeleteBlack.svg">resources/XDeleteBlack.svg</file>
         <file>resources/icons/qgroundcontrol.ico</file>
+        <file>resources/icons/Xspot.svg</file>
     </qresource>
     <qresource prefix="/res/firmware">
         <file alias="px4.png">resources/firmware/px4.png</file>

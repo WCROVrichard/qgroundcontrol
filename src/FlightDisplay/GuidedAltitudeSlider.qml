@@ -17,9 +17,9 @@ import QGroundControl.Vehicle       1.0
 /// Altitude slider for guided change altitude command
 Rectangle {
     id:                 _root
-
-    readonly property real _maxAlt: 121.92  // 400 feet
-    readonly property real _minAlt: 3
+    // modified for sub use
+    readonly property real _maxAlt: 0  // 0 feet
+    readonly property real _minAlt: -150 // -450 feet
 
     property var _guidedSettings:       QGroundControl.settingsManager.guidedSettings
     property var _activeVehicle:        QGroundControl.multiVehicleManager.activeVehicle

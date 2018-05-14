@@ -80,6 +80,8 @@
 #include "ParameterManager.h"
 #include "SettingsManager.h"
 #include "QGCCorePlugin.h"
+// for SeaView build with SubSonus comms
+#include "subsonusmanager.h"
 
 #ifndef NO_SERIAL_LINK
 #include "SerialLink.h"
@@ -372,7 +374,9 @@ void QGCApplication::_initCommon(void)
     qmlRegisterUncreatableType<QGCMapPolygon>       ("QGroundControl.FlightMap",            1, 0, "QGCMapPolygon",          "Reference only");
     qmlRegisterUncreatableType<MissionController>   ("QGroundControl.Controllers",          1, 0, "MissionController",      "Reference only");
     qmlRegisterUncreatableType<GeoFenceController>  ("QGroundControl.Controllers",          1, 0, "GeoFenceController",     "Reference only");
-    qmlRegisterUncreatableType<RallyPointController>("QGroundControl.Controllers",          1, 0, "RallyPointController",    "Reference only");
+    qmlRegisterUncreatableType<RallyPointController>("QGroundControl.Controllers",          1, 0, "RallyPointController",   "Reference only");
+    // for SeaView build with SubSonus comms
+    qmlRegisterUncreatableType<SubSonusManager>     ("QGroundControl.SubSonusManager",      1, 0, "SubSonusManager",        "Reference only");
 
     qmlRegisterType<ParameterEditorController>      ("QGroundControl.Controllers", 1, 0, "ParameterEditorController");
     qmlRegisterType<ESP8266ComponentController>     ("QGroundControl.Controllers", 1, 0, "ESP8266ComponentController");
@@ -384,6 +388,8 @@ void QGCApplication::_initCommon(void)
     qmlRegisterType<JoystickConfigController>       ("QGroundControl.Controllers", 1, 0, "JoystickConfigController");
     qmlRegisterType<LogDownloadController>          ("QGroundControl.Controllers", 1, 0, "LogDownloadController");
     qmlRegisterType<SyslinkComponentController>     ("QGroundControl.Controllers", 1, 0, "SyslinkComponentController");
+
+
 #ifndef __mobile__
     qmlRegisterType<ViewWidgetController>           ("QGroundControl.Controllers", 1, 0, "ViewWidgetController");
     qmlRegisterType<CustomCommandWidgetController>  ("QGroundControl.Controllers", 1, 0, "CustomCommandWidgetController");
