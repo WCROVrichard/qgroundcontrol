@@ -284,6 +284,14 @@ void FirmwarePlugin::guidedModeChangeAltitude(Vehicle* vehicle, double altitudeR
     qgcApp()->showMessage(guided_mode_not_supported_by_vehicle);
 }
 
+void FirmwarePlugin::guidedModeLateralMove(Vehicle* vehicle, QString direction)
+{
+    // Not supported by generic vehicle
+    Q_UNUSED(vehicle);
+    Q_UNUSED(direction);
+    qgcApp()->showMessage(guided_mode_not_supported_by_vehicle);
+}
+
 void FirmwarePlugin::startMission(Vehicle* vehicle)
 {
     // Not supported by generic vehicle

@@ -40,7 +40,7 @@ SubsonusPosition::PositioningMethods SubsonusPosition::supportedPositioningMetho
 
 int SubsonusPosition::minimumUpdateInterval() const
 {
-    return 5000;
+    return 2000;
 }
 
 void SubsonusPosition::startUpdates()
@@ -65,6 +65,8 @@ void SubsonusPosition::requestUpdate(int /*timeout*/)
 
 void SubsonusPosition::updatePosition()
 {
+
+// qDebug() << "SubSonPosition update: " << _subsonusManager->latitude() << " " << _subsonusManager->longitude();
 
     double latitude = (double) (lat_int);
     double longitude = (double) (lon_int);

@@ -84,6 +84,8 @@ Item {
     readonly property int actionResumeMissionReady:         15
     readonly property int actionResumeMissionUploadFail:    16
     readonly property int actionPause:                      17
+    // new for lateral move action for subs
+    readonly property int actionLateralMove:                18
 
     property bool showEmergenyStop:     !_hideEmergenyStop && _activeVehicle && _vehicleArmed && _vehicleFlying
     property bool showArm:              _activeVehicle && !_vehicleArmed
@@ -308,6 +310,9 @@ Item {
             break
         case actionGoto:
             _activeVehicle.guidedModeGotoLocation(actionData)
+            break
+        case actionLateralMove:
+            _activeVehicle.guidedModeLateralMove(actionData)
             break
         case actionSetWaypoint:
             _activeVehicle.setCurrentMissionSequence(actionData)

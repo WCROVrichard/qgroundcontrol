@@ -21,6 +21,7 @@ import QGroundControl.MultiVehicleManager   1.0
 import QGroundControl.Vehicle               1.0
 import QGroundControl.Mavlink               1.0
 import QGroundControl.QGCPositionManager    1.0
+import QGroundControl.SubSonusManager       1.0
 
 Map {
     id: _map
@@ -35,6 +36,9 @@ Map {
     property string mapName:                        'defaultMap'
     property bool   isSatelliteMap:                 activeMapType.name.indexOf("Satellite") > -1 || activeMapType.name.indexOf("Hybrid") > -1
     property var    gcsPosition:                    QtPositioning.coordinate()
+    property real   gcsHeading:                     QGroundControl.subsonusManager.heading
+    property real   gcsSpeed:                       QGroundControl.subsonusManager.trueVel
+    property real   gcsCourse:                      QGroundControl.subsonusManager.course
     property bool   userPanned:                     false   ///< true: the user has manually panned the map
     property bool   allowGCSLocationCenter:         false   ///< true: map will center/zoom to gcs location one time
     property bool   allowVehicleLocationCenter:     false   ///< true: map will center/zoom to vehicle location one time
@@ -82,6 +86,7 @@ Map {
         }
     }
 
+
     // We track whether the user has panned or not to correctly handle automatic map positioning
     Connections {
         target: gesture
@@ -126,12 +131,40 @@ Map {
         coordinate:     gcsPosition
 
         sourceItem: Image {
+            id:             gcsIcon
             source:         "/res/QGCLogoFull"
             mipmap:         true
             antialiasing:   true
             fillMode:       Image.PreserveAspectFit
-            height:         ScreenTools.defaultFontPixelHeight * 1.75
+            height:         ScreenTools.defaultFontPixelHeight * 4.5
             sourceSize.height: height
+            transform: Rotation {
+                origin.x:       gcsIcon.width / 2
+                origin.y:       gcsIcon.height / 2
+                angle:          gcsHeading
+            }
         }
-    }
+     }
+
+    // Vector arrow for GCS
+    MapQuickItem {
+        anchorPoint.x:  gcsCourseIcon.width / 2
+        anchorPoint.y:  gcsCourseIcon.height
+        visible:        gcsPosition.isValid
+        coordinate:     gcsPosition
+
+        sourceItem: Image {
+            id:             gcsCourseIcon
+            source:         "/qmlimages/HeadingArrow.png"
+            height:         if ( gcsSpeed <= 1 )  { 40 + (gcsSpeed * 50) }
+                            else { 90 }
+            transform: Rotation {
+                origin.x:       gcsCourseIcon.width /2
+                origin.y:       gcsCourseIcon.height
+                angle:          gcsCourse
+            }
+        }
+     }
+
+
 } // Map

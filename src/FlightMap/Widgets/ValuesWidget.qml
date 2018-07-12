@@ -135,7 +135,8 @@ QGCFlickable {
                 horizontalAlignment:    Text.AlignHCenter
                 color:                  textColor
                 fontSizeMode:           Text.HorizontalFit
-                text:                   fact.enumOrValueString
+                text:                   if (fact.shortDescription === "Depth" ) { Math.round (fact.enumOrValueString * 3.28 * 10) / 10 }
+                                        else { fact.enumOrValueString }
             }
             QGCLabel {
                 width:                  parent.width
@@ -143,7 +144,8 @@ QGCFlickable {
                 font.pointSize:         ScreenTools.isTinyScreen ? ScreenTools.smallFontPointSize * 0.75 : ScreenTools.smallFontPointSize
                 fontSizeMode:           Text.HorizontalFit
                 color:                  textColor
-                text:                   fact.units
+                text:                   if (fact.shortDescription === "Depth" ) { "feet" }
+                                        else { fact.units }
             }
         }
     }

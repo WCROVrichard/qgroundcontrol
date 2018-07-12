@@ -9,6 +9,7 @@
 
 
 import QtQuick                  2.3
+// import QtCharts 2.1
 import QtQuick.Controls         1.2
 import QtQuick.Controls.Styles  1.4
 import QtQuick.Dialogs          1.2
@@ -56,7 +57,7 @@ QGCView {
     property real   _margins:               ScreenTools.defaultFontPixelWidth / 2
     property real   _pipSize:               flightView.width * 0.2
     property alias  _guidedController:      guidedActionsController
-    property alias  _altitudeSlider:        altitudeSlider
+    property alias  _altitudeSlider:        altitudeSlider 
 
 
     readonly property bool      isBackgroundDark:       _mainIsMap ? (_flightMap ? _flightMap.isSatelliteMap : true) : true
@@ -102,6 +103,7 @@ QGCView {
             px4JoystickSupport.open()
         }
     }
+
 
     PlanElemementMasterController {
         id:                     masterController
@@ -240,28 +242,80 @@ QGCView {
 
         Item {
 
-            id: seaViewCustomOverlayTEST
+            id: seaViewCustomOverlay
             anchors.fill: parent
             z: 9997
 
             Rectangle {
 
-                height: 60
-                width: 700
+                height: 80
+                width: 750
                 anchors.top:             parent.top
                 anchors.horizontalCenter:   parent.horizontalCenter
-                anchors.topMargin:  ScreenTools.toolbarHeight + (_margins * 2)
+                anchors.topMargin:  ScreenTools.toolbarHeight + (_margins)
                 color:  "transparent"
-                Layout.fillWidth: true
+                // Layout.fillWidth: true
 
                 GridLayout{
                     id: subsonusInfoPane
-                    columns: 3
-                    columnSpacing: 20
+                    columns: 5
+                    columnSpacing: 3
                     rows: 2
                     flow: GridLayout.TopToBottom
                     Layout.margins: 5
                     anchors.fill: parent
+
+
+                   /* ChartView {
+                        id: depthChart
+                        width: 240
+                        height: 100
+                        Layout.rowSpan: 2
+                        Layout.topMargin: 10
+                        animationOptions: ChartView.AllAnimations
+                        theme: ChartView.ChartThemeDark
+                        property bool openGL: true
+                        property bool openGLSupported: true
+
+
+                        DateTimeAxis {
+                            id: axisX
+
+                        }
+
+                        ValueAxis {
+                            id: axisY
+
+                        }
+
+                        SplineSeries {
+                            id: actualDepth
+                            axisX: axisX
+                            axisY: axisY
+                        }
+
+                        SplineSeries {
+                            id: setpoint
+                            axisX: axisX
+                            axisY: axisY
+                        }
+
+                         Timer {
+                            id: refreshTimer
+                            interval: 1 / 10 * 1000 // 10 Hz
+                            running: true
+                            repeat: true
+                            property var timeNow: Qt.formatTime(new Date(), "hh:mm:ss.zzz")
+                            onTriggered: {
+                                if (_activeVehicle) {
+                                // actualDepth.remove(0);
+                                actualDepth.append(timeNow, _activeVehicle.altitudeRelative.rawValue);
+                                // setpoint.remove(0);
+                                setpoint.append(timeNow, (_activeVehicle.altitudeRelative.rawValue + _activeVehicle.altError.rawValue));
+                                }
+                            }
+                         }
+                    }  */
 
 
                     QGCLabel {
@@ -270,14 +324,18 @@ QGCView {
                     }
                     Rectangle {
                         color:  qgcPal.window
-                        height: 30
-                        width: 80
+                        height: 27
+                        width: 120
                         border.color:   qgcPal.mapWidgetBorderLight
-                        border.width:   1
-                        radius:         1
+                        border.width:   .5
+                        radius:         2
+                        Layout.alignment: Qt.AlignTop
+                        // Layout.preferredWidth: 225
                         QGCLabel{
-                            text: "  " + _activeVehicle.altitudeRelative.rawValue
+                            anchors.fill:   parent
+                            text: "  " + Math.round(_activeVehicle.altitudeRelative.rawValue * 3.28 *10) / 10 + " ft "
                             font.pointSize:         ScreenTools.largeFontPointSize
+                            horizontalAlignment: Text.AlignRight
                         }
                     }
 
@@ -288,14 +346,18 @@ QGCView {
                     }
                     Rectangle {
                         color:  qgcPal.window
-                        height: 30
-                        width: 80
+                        height: 27
+                        width: 120
                         border.color:   qgcPal.mapWidgetBorderLight
-                        border.width:   1
-                        radius:         1
+                        border.width:   .5
+                        radius:         2
+                        Layout.alignment: Qt.AlignTop
+                        // Layout.preferredWidth: 175
                         QGCLabel{
-                            text: "  " + Math.round(_activeVehicle.climbRate.rawValue * 10) / 10
+                            anchors.fill:   parent
+                            text: "  " + Math.round(_activeVehicle.climbRate.rawValue * 3.28 * 10) / 10 + " ft/sec "
                             font.pointSize:         ScreenTools.largeFontPointSize
+                            horizontalAlignment: Text.AlignRight
                         }
                     }
 
@@ -305,48 +367,58 @@ QGCView {
                     }
                     Rectangle {
                         color:  qgcPal.window
-                        height: 30
-                        width: 80
+                        height: 27
+                        width: 120
                         border.color:   qgcPal.mapWidgetBorderLight
-                        border.width:   1
-                        radius:         1
+                        border.width:   .5
+                        radius:         2
+                        Layout.alignment: Qt.AlignTop
+                        // Layout.preferredWidth: 175
                         QGCLabel{
-                            text: "  " + (QGroundControl.subsonusManager.range).toFixed(1)
+                            anchors.fill:   parent
+                            text: "  " + Math.round( QGroundControl.subsonusManager.range * 3.28 * 10 ) / 10 + " ft "
                             font.pointSize:         ScreenTools.largeFontPointSize
+                            horizontalAlignment: Text.AlignRight
                         }
                     }
 
 
+
                     QGCLabel{
-                        text: "COG: " + (SubSonusManager.course.valueOf()).toFixed(0)
+                        text: "COG: " +  (QGroundControl.subsonusManager.course).toFixed(0)
                         font.pointSize:         ScreenTools.largeFontPointSize
+                        Layout.alignment: Qt.AlignLeft
+                        Layout.preferredWidth: 175
 
                     }
                     QGCLabel{
-                        text: "SOG: " + (SubSonusManager.trueVel.rawValue).toFixed(1)
+                        text: "SOG: " +  Math.round(QGroundControl.subsonusManager.trueVel * 3.28 * 10) / 10 + " ft/sec"
                         font.pointSize:         ScreenTools.largeFontPointSize
-
+                        Layout.alignment: Qt.AlignTop
                     }
 
 
 
-                } // end grid layout
+               } // end grid layout
             } // end rectangle
         } // end item
 
         Item {
-            id: seaViewCustomControlPanel
+            id: seaViewAutoFuncs
             anchors.fill: parent
             z: 9998
 
             Rectangle {
 
-                height: 210
-                width: 190
-                anchors.right:             parent.right
-                anchors.rightMargin: ScreenTools.defaultFontPixelWidth
+                //height: 210
+                //width: 190
+                //anchors.right:             parent.right
+                //anchors.rightMargin: ScreenTools.defaultFontPixelWidth
+                width: 400
+                height: 90
+                anchors.horizontalCenter:   parent.horizontalCenter
                 anchors.bottom:             parent.bottom
-                anchors.bottomMargin:  ScreenTools.toolbarHeight + (_margins * 4)
+                anchors.bottomMargin:  (_margins *2 )
                 border.color:   qgcPal.mapWidgetBorderLight
                 border.width:   1
                 radius:         ScreenTools.defaultFontPixelHeight / 2
@@ -354,18 +426,25 @@ QGCView {
 
                 GridLayout {
                     id:  seaviewIndicatorsColumn
-                    columns: 3
+                    columns: 6
                     flow: GridLayout.TopToBottom
-                    rows: 5
+                    rows: 2
+                    columnSpacing: 20
 
-                    QGCLabel {
+                    /* QGCLabel {
                         id:                     titleText
                         color:                  "white"
                         font.pointSize:         ScreenTools.largeFontPointSize
                         text: "Auto Functions"
                         Layout.columnSpan: 3
                         Layout.alignment: Qt.AlignHCenter
+                    } */
+
+                    QGCLabel {
+                        text: "    "
+                        Layout.rowSpan: 2
                     }
+
                     StatusIndicator {
                         id: monualhorizontal
                         Layout.alignment: Qt.AlignHCenter
@@ -806,7 +885,7 @@ QGCView {
             property Fact _virtualJoystick: QGroundControl.settingsManager.appSettings.virtualJoystick
         }
 
-        // POSSIBLY HIDING left-side tool strip for SeaView build
+        // HIDING left-side tool strip for SeaView build
 
   /*      ToolStrip {
             visible:            _activeVehicle ? _activeVehicle.guidedModeSupported : true

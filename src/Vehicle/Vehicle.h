@@ -434,6 +434,10 @@ public:
     ///     @param altitudeChange If > 0, go up by amount specified, if < 0, go down by amount specified
     Q_INVOKABLE void guidedModeChangeAltitude(double altitudeChange);
 
+    /// Command vehicle to move vehicle laterally
+    ///
+    Q_INVOKABLE void guidedModeLateralMove(QString direction);
+
     /// Command vehicle to orbit given center point
     ///     @param centerCoord Center Coordinates
     ///     @param radius Distance from vehicle to centerCoord

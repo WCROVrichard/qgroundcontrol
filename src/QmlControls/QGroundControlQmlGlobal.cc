@@ -30,6 +30,7 @@ QGroundControlQmlGlobal::QGroundControlQmlGlobal(QGCApplication* app, QGCToolbox
     , _linkManager(NULL)
     , _multiVehicleManager(NULL)
     , _mapEngineManager(NULL)
+    , _subsonusManager(NULL)
     , _qgcPositionManager(NULL)
     , _missionCommandTree(NULL)
     , _videoManager(NULL)
@@ -55,6 +56,7 @@ void QGroundControlQmlGlobal::setToolbox(QGCToolbox* toolbox)
     _linkManager            = toolbox->linkManager();
     _multiVehicleManager    = toolbox->multiVehicleManager();
     _mapEngineManager       = toolbox->mapEngineManager();
+    _subsonusManager        = toolbox->subsonusManager();
     _qgcPositionManager     = toolbox->qgcPositionManager();
     _missionCommandTree     = toolbox->missionCommandTree();
     _videoManager           = toolbox->videoManager();

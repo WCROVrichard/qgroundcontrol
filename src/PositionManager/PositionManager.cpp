@@ -43,7 +43,7 @@ void QGCPositionManager::setToolbox(QGCToolbox *toolbox)
    _subsonusSource = new SubsonusPosition();
    if (_subsonusSource != nullptr) {
           setPositionSource(QGCPositionManager::SubSonus);
-         qDebug() << "set subsonus as position source";
+        // qDebug() << "set subsonus as position source";
   }
 
    // _simulatedSource = new SimulatedPosition();

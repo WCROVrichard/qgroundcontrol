@@ -22,6 +22,7 @@ import QGroundControl.Controls      1.0
 import QGroundControl.Palette       1.0
 import QGroundControl.Vehicle       1.0
 import QGroundControl.Controllers   1.0
+import QGroundControl.SubSonusManager 1.0
 
 FlightMap {
     id:                         flightMap
@@ -46,6 +47,8 @@ FlightMap {
     property var    _missionController:         _planMasterController.missionController
     property var    _geoFenceController:        _planMasterController.geoFenceController
     property var    _rallyPointController:      _planMasterController.rallyPointController
+    property real   _ROVvelocity:               QGroundControl.subsonusManager.ROVvelocity
+    property real   _ROVcourse:                 QGroundControl.subsonusManager.ROVcourse
     property var    _activeVehicle:             QGroundControl.multiVehicleManager.activeVehicle
     property var    _activeVehicleCoordinate:   _activeVehicle ? _activeVehicle.coordinate : QtPositioning.coordinate()
     property var    _gotoHereCoordinate:        QtPositioning.coordinate()
@@ -122,39 +125,42 @@ FlightMap {
     function sendGoToFromKeyboard(button) {
         if ((guidedActionsController.showGotoLocation && !guidedActionsController.guidedUIVisible)
                        || (_activeVehicle.sub && _activeVehicle.guidedMode)) {
-            var newHeading = _activeVehicle.heading.rawValue
-            console.log("key command, heading is " + newHeading)
+            console.log("key command to move " + button)
             console.log("current depth is " + _activeVehicle.altitudeRelative.rawValue )
+            /* original keypress section using waypoint Goto nav function, replacing June 20 with NED position movement function
             if (button === "up") {
-                _gotoHereCoordinate = (_activeVehicleCoordinate.atDistanceAndAzimuth(.2, newHeading))
+                _gotoHereCoordinate = (_activeVehicleCoordinate.atDistanceAndAzimuth(.3, newHeading))
                 guidedActionsController.executeAction(guidedActionsController.actionGoto, _gotoHereCoordinate)
             }
             if (button === "down") {
                 newHeading -= 180
                 if (newHeading < 0) { newHeading += 360 }
-                _gotoHereCoordinate = (_activeVehicleCoordinate.atDistanceAndAzimuth(.2, newHeading))
+                _gotoHereCoordinate = (_activeVehicleCoordinate.atDistanceAndAzimuth(.3, newHeading))
                 guidedActionsController.executeAction(guidedActionsController.actionGoto, _gotoHereCoordinate)
             }
             if (button === "right") {
                 newHeading += 90
                 if (newHeading > 360) { newHeading -= 360 }
-                _gotoHereCoordinate = (_activeVehicleCoordinate.atDistanceAndAzimuth(.2, newHeading))
+                _gotoHereCoordinate = (_activeVehicleCoordinate.atDistanceAndAzimuth(.3, newHeading))
                 guidedActionsController.executeAction(guidedActionsController.actionGoto, _gotoHereCoordinate)
             }
             if (button === "left") {
                 newHeading -= 90
                 if (newHeading < 0) { newHeading += 360 }
-                _gotoHereCoordinate = (_activeVehicleCoordinate.atDistanceAndAzimuth(.2, newHeading))
+                _gotoHereCoordinate = (_activeVehicleCoordinate.atDistanceAndAzimuth(.3, newHeading))
                 guidedActionsController.executeAction(guidedActionsController.actionGoto, _gotoHereCoordinate)
-            }
+            }  */
+
 
             if (button === "pageup") {
-                guidedActionsController.executeAction(guidedActionsController.actionChangeAlt, .2)
+                guidedActionsController.executeAction(guidedActionsController.actionChangeAlt, 0.1)
             }
-            if (button === "pagedown") {
-                guidedActionsController.executeAction(guidedActionsController.actionChangeAlt, -.2)
+            else if (button === "pagedown") {
+                guidedActionsController.executeAction(guidedActionsController.actionChangeAlt, -0.05)
             }
-
+            else {
+                guidedActionsController.executeAction(guidedActionsController.actionLateralMove, button)
+            }
 
         }
     }
@@ -233,7 +239,27 @@ FlightMap {
         }
     }
 
-    // Add the mission item visuals to the map
+    // Add a vector arrow for heading and velocity for vehicle to the map
+
+        MapQuickItem {
+            coordinate:     _activeVehicleCoordinate
+            anchorPoint.x:  sourceItem.width / 2
+            anchorPoint.y:  sourceItem.height
+            z:              QGroundControl.zOrderVehicles + 1
+            sourceItem: Image {
+                id:                 vehicleHeadingArrow
+                source:             "/qmlimages/HeadingArrow.png"
+                height:             if ( _ROVvelocity <= 1 ) { 40 + (_ROVvelocity * 50) }
+                                    else { 90 }
+                transform: Rotation {
+                    origin.x:       vehicleHeadingArrow.width / 2
+                    origin.y:       vehicleHeadingArrow.height
+                    angle:          _ROVcourse
+                }
+        }
+    }
+
+    //  Add the mission item visuals to the map
     Repeater {
         model: _mainIsMap ? _missionController.visualItems : 0
 
@@ -319,11 +345,12 @@ FlightMap {
         focus: true
         Keys.onLeftPressed:  sendGoToFromKeyboard("left")
         Keys.onRightPressed: sendGoToFromKeyboard("right")
-        Keys.onUpPressed: sendGoToFromKeyboard("up")
-        Keys.onDownPressed: sendGoToFromKeyboard("down")
+        Keys.onUpPressed: sendGoToFromKeyboard("forward")
+        Keys.onDownPressed: sendGoToFromKeyboard("back")
         Keys.onPressed: if (event.key === Qt.Key_PageUp) { sendGoToFromKeyboard("pageup") }
             else if (event.key === Qt.Key_PageDown) { sendGoToFromKeyboard("pagedown") }
         Component.onCompleted: forceActiveFocus()
+        onVisibleChanged: if (visible) { forceActiveFocus() }
     }
 
 

@@ -375,7 +375,6 @@ void QGCApplication::_initCommon(void)
     qmlRegisterUncreatableType<MissionController>   ("QGroundControl.Controllers",          1, 0, "MissionController",      "Reference only");
     qmlRegisterUncreatableType<GeoFenceController>  ("QGroundControl.Controllers",          1, 0, "GeoFenceController",     "Reference only");
     qmlRegisterUncreatableType<RallyPointController>("QGroundControl.Controllers",          1, 0, "RallyPointController",   "Reference only");
-    // for SeaView build with SubSonus comms
     qmlRegisterUncreatableType<SubSonusManager>     ("QGroundControl.SubSonusManager",      1, 0, "SubSonusManager",        "Reference only");
 
     qmlRegisterType<ParameterEditorController>      ("QGroundControl.Controllers", 1, 0, "ParameterEditorController");

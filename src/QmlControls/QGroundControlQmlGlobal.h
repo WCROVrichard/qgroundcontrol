@@ -46,6 +46,7 @@ public:
     Q_PROPERTY(LinkManager*         linkManager         READ linkManager            CONSTANT)
     Q_PROPERTY(MultiVehicleManager* multiVehicleManager READ multiVehicleManager    CONSTANT)
     Q_PROPERTY(QGCMapEngineManager* mapEngineManager    READ mapEngineManager       CONSTANT)
+    Q_PROPERTY(SubSonusManager*     subsonusManager     READ subsonusManager       CONSTANT)
     Q_PROPERTY(QGCPositionManager*  qgcPositionManger   READ qgcPositionManger      CONSTANT)
     Q_PROPERTY(MissionCommandTree*  missionCommandTree  READ missionCommandTree     CONSTANT)
     Q_PROPERTY(VideoManager*        videoManager        READ videoManager           CONSTANT)
@@ -135,6 +136,7 @@ public:
     LinkManager*            linkManager         ()  { return _linkManager; }
     MultiVehicleManager*    multiVehicleManager ()  { return _multiVehicleManager; }
     QGCMapEngineManager*    mapEngineManager    ()  { return _mapEngineManager; }
+    SubSonusManager*        subsonusManager     ()  { return _subsonusManager; }
     QGCPositionManager*     qgcPositionManger   ()  { return _qgcPositionManager; }
     MissionCommandTree*     missionCommandTree  ()  { return _missionCommandTree; }
     VideoManager*           videoManager        ()  { return _videoManager; }
@@ -194,6 +196,7 @@ private:
     LinkManager*            _linkManager;
     MultiVehicleManager*    _multiVehicleManager;
     QGCMapEngineManager*    _mapEngineManager;
+    SubSonusManager*        _subsonusManager;
     QGCPositionManager*     _qgcPositionManager;
     MissionCommandTree*     _missionCommandTree;
     VideoManager*           _videoManager;

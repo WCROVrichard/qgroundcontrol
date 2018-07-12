@@ -15,21 +15,6 @@ class SubSonusManager : public QGCTool
 
 
     Q_OBJECT
-    // SubSonus system state values
-    Q_PROPERTY(QString sysStatus MEMBER _status NOTIFY sysDataChanged)
-    Q_PROPERTY(double latitude MEMBER _lat NOTIFY sysDataChanged)
-    Q_PROPERTY(double longitude MEMBER _lon NOTIFY sysDataChanged)
-    Q_PROPERTY(float heading MEMBER _heading NOTIFY sysDataChanged)
-    Q_PROPERTY(float course MEMBER _course NOTIFY sysDataChanged)
-    Q_PROPERTY(float trueVel MEMBER _trueVel NOTIFY sysDataChanged)
-
-    // SubSonus remote vehicle tracking values
-    Q_PROPERTY(float range MEMBER _range NOTIFY trackDataChanged)
-    Q_PROPERTY(float azimuth MEMBER _azimuth NOTIFY trackDataChanged)
-
-signals:
-    void sysDataChanged();
-    void trackDataChanged();
 
 public:
     SubSonusManager(QGCApplication* app, QGCToolbox* toolbox);
@@ -38,7 +23,23 @@ public:
     // Override from QGCTool
     virtual void setToolbox(QGCToolbox *toolbox);
 
+    // SubSonus system state values
+    Q_PROPERTY(QString sysStatus READ status NOTIFY sysDataChanged)
+    Q_PROPERTY(double latitude READ latitude NOTIFY sysDataChanged)
+    Q_PROPERTY(double longitude READ longitude NOTIFY sysDataChanged)
+    Q_PROPERTY(float heading READ heading NOTIFY sysDataChanged)
+    Q_PROPERTY(float course READ course NOTIFY sysDataChanged)
+    Q_PROPERTY(float trueVel READ trueVel NOTIFY sysDataChanged)
+
+    // SubSonus remote vehicle tracking values
+    Q_PROPERTY(float range READ range NOTIFY trackDataChanged)
+    Q_PROPERTY(float azimuth READ azimuth NOTIFY trackDataChanged)
+    Q_PROPERTY(float ROVcourse READ ROVcourse NOTIFY trackDataChanged)
+    Q_PROPERTY(float ROVvelocity READ ROVvelocity NOTIFY trackDataChanged)
+
+
     // values for position manager to access
+    QString status()          { return _status; }
     double latitude()         { return _lat; }
     double longitude()        { return _lon; }
     float heading()           { return _heading; }
@@ -46,6 +47,12 @@ public:
     float trueVel()           { return _trueVel; }
     float range()             { return _range; }
     float azimuth()           { return _azimuth; }
+    float ROVcourse()         { return _ROVcourse; }
+    float ROVvelocity()       { return _ROVvelocity; }
+
+signals:
+    void sysDataChanged();
+    void trackDataChanged();
 
 private:
     QTcpSocket *tcpSocket;
@@ -57,10 +64,15 @@ private:
     float _velN;
     float _velE;
     float _course;
-    float _trueVelSqaured;
+    float _trueVelSquared;
     float _trueVel;
     float _range;
     float _azimuth;
+    float _ROVvelN;
+    float _ROVvelE;
+    float _ROVcourse;
+    float _ROVvelocity;
+    float _ROVvelSquared;
     QByteArray _holdingBuffer;
 
 private slots:

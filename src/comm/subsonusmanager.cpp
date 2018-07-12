@@ -18,21 +18,25 @@ SubSonusManager::SubSonusManager(QGCApplication* app, QGCToolbox* toolbox)
     , _status("initializing")
     , _lat(0)
     , _lon(0)
-    , _heading(0)
+    , _heading(210)
     , _velN(0)
     , _velE(0)
-    , _course(0)
-    , _trueVelSqaured(0)
+    , _course(150)
+    , _trueVelSquared(0)
     , _trueVel(0)
     , _range(0)
     , _azimuth(0)
+    , _ROVvelN(0)
+    , _ROVvelE(0)
+    , _ROVcourse(0)
+    , _ROVvelocity(0)
+    , _ROVvelSquared(0)
 
 {
 
 
 }
 
-// mabye don't need destructor?
 SubSonusManager::~SubSonusManager() {
 
     closeConnection();
@@ -61,8 +65,8 @@ void SubSonusManager::setToolbox(QGCToolbox *toolbox)
 void SubSonusManager::connectToServer() {
 
     tcpSocket->abort();
-
-    tcpSocket->connectToHost("192.168.2.101", 16718);
+    // changed 6/18/2018 to port 16719 instead of ..18 to allow for packet 25
+    tcpSocket->connectToHost("192.168.2.101", 16719);
     _status = "connecting";
 }
 
@@ -76,7 +80,7 @@ void SubSonusManager::updateData() {
         // uint8_t lrcCheck = ((_holdingBuffer[1] + _holdingBuffer[2] + _holdingBuffer[3] + _holdingBuffer[4]) ^ 0xFF) + 1;
         // qDebug() << "LRC from packet: " << _holdingBuffer[0] << " vs. check val: " << lrcCheck;
 
-        // can judge packet types by size: sysState are 121, tracks are 216.
+        // can judge packet types by size: sysState are 121, remote tracks are 216, remote states (which have ROV velocity info) are 135.
         if(_holdingBuffer.size() == 121) {
             // it's a sysState packet, process it
             // trim off first 5 bytes
@@ -86,7 +90,7 @@ void SubSonusManager::updateData() {
             QByteArray latData = packetData.mid(16,8);
                      _lat = *reinterpret_cast<double*>(latData.data());
                      _lat *= 180/M_PI;
-                    // qDebug() << "lat: " << _lat;
+                    // qDebug() << " SubSonManager update lat: " << _lat;
 
             QByteArray lonData = packetData.mid(24,8);
                     _lon = *reinterpret_cast<double*>(lonData.data());
@@ -103,12 +107,12 @@ void SubSonusManager::updateData() {
                     _course = atan2(_velE, _velN); // This function returns the angle, in radians, between -pi and pi.
                     _course *= 180.0 / M_PI; // Convert from radians to degrees. Now heading is in the range [-180, 180]
                     if (_course < 0.0) { _course += 360.0 ;} // get rid of negative values
-                    _trueVelSqaured = ( pow(_velN, 2) + pow(_velE, 2));
-                    _trueVel = sqrt(_trueVelSqaured);
+                    _trueVelSquared = ( pow(_velN, 2) + pow(_velE, 2));
+                    _trueVel = sqrt(_trueVelSquared);
              emit sysDataChanged();
         }
         else if(_holdingBuffer.size() == 216) {
-            // it's a track packet, process it
+            // it's a remoteTrack packet, we must deal with it
             // trim off first 5 bytes
             QByteArray packetData = _holdingBuffer.right(211);
 
@@ -121,6 +125,24 @@ void SubSonusManager::updateData() {
                     if (_azimuth < 0.0) { _azimuth += 360.0 ;}
             emit trackDataChanged();
         }
+        else if(_holdingBuffer.size() == 135) {
+            // it's a remoteState packet, we want the ROV's COG and velocity
+            // trim off first 5 bytes
+            QByteArray packetData = _holdingBuffer.right(130);
+                    // qDebug() << "buffer dump: " << _holdingBuffer;
+
+            QByteArray velNData = packetData.mid(54,4);
+            QByteArray velEData = packetData.mid(58,4);
+                    _ROVvelN = *reinterpret_cast<float*>(velNData.data());
+                    _ROVvelE = *reinterpret_cast<float*>(velEData.data());
+                    _ROVcourse = atan2(_ROVvelE, _ROVvelN); // This function returns the angle, in radians, between -pi and pi.
+                    _ROVcourse *= 180.0 / M_PI; // Convert from radians to degrees. Now heading is in the range [-180, 180]
+                    if (_ROVcourse < 0.0) { _ROVcourse += 360.0 ;} // get rid of negative values
+                    _ROVvelSquared = ( pow(_velN, 2) + pow(_velE, 2));
+                    _ROVvelocity = sqrt(_ROVvelSquared);
+             emit trackDataChanged();
+        }
+
         else {
             //something's wrong, bail
             _status = "comm error";

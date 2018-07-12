@@ -141,6 +141,9 @@ public:
     ///     @param altitudeChange If > 0, go up by amount specified, if < 0, go down by amount specified
     virtual void guidedModeChangeAltitude(Vehicle* vehicle, double altitudeChange);
 
+    /// Command vehicle to move laterally
+    virtual void guidedModeLateralMove(Vehicle* vehicle, QString direction);
+
     /// FIXME: This isn't quite correct being here. All code for Joystick suvehicleTypepport is currently firmware specific
     /// not just this. I'm going to try to change that. If not, this will need to be removed.
     /// Returns the number of buttons which are reserved for firmware use in the MANUAL_CONTROL mavlink

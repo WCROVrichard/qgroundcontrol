@@ -191,6 +191,8 @@ void ArduSubFirmwarePlugin::guidedModeChangeAltitude(Vehicle* vehicle, double al
         return;
     }
 
+    float altAmount = -(altitudeChange);
+
     // don't think we need this, will only be called in guided mode
     // setGuidedMode(vehicle, true);
     qDebug() << "plugin setting altitude change to: " << altitudeChange;
@@ -205,7 +207,7 @@ void ArduSubFirmwarePlugin::guidedModeChangeAltitude(Vehicle* vehicle, double al
     cmd.type_mask = 0xFFF8; // Only x/y/z valid
     cmd.x = 0.0f;
     cmd.y = 0.0f;
-    cmd.z = -(altitudeChange);
+    cmd.z = altAmount;
 
     MAVLinkProtocol* mavlink = qgcApp()->toolbox()->mavlinkProtocol();
     mavlink_msg_set_position_target_local_ned_encode_chan(mavlink->getSystemId(),
@@ -215,6 +217,127 @@ void ArduSubFirmwarePlugin::guidedModeChangeAltitude(Vehicle* vehicle, double al
                                                           &cmd);
 
     vehicle->sendMessageOnLink(vehicle->priorityLink(), msg);
+}
+
+
+// Adding lateral move command as a substitute for unpredictable GotoLocation command
+
+void ArduSubFirmwarePlugin::guidedModeLateralMove(Vehicle* vehicle, QString direction)
+{
+    if (qIsNaN(vehicle->altitudeRelative()->rawValue().toDouble())) {
+        qgcApp()->showMessage(QStringLiteral("Unable to move, vehicle altitude not known."));
+        return;
+    }
+
+    float _moveAmount = 0.5;
+    int32_t _newX = 0;
+    int32_t _newY = 0;
+    float _currentAlt = vehicle->altitudeRelative()->rawValue().toFloat();
+    QGeoCoordinate _currentPoint = vehicle->coordinate();
+    QGeoCoordinate _gotoPoint;
+    float _targetAzimuth = vehicle->heading()->rawValue().toFloat();
+
+
+    if (direction == "forward") {
+        _gotoPoint = _currentPoint.atDistanceAndAzimuth(_moveAmount, _targetAzimuth);
+        _newX = (_gotoPoint.latitude()*1e7);
+        _newY = (_gotoPoint.longitude()*1e7);
+        }
+    else if (direction == "right") {
+        _targetAzimuth += 90;
+        if (_targetAzimuth > 360) { _targetAzimuth -= 360; }
+        _gotoPoint = _currentPoint.atDistanceAndAzimuth(_moveAmount, _targetAzimuth);
+        _newX = (_gotoPoint.latitude()*1e7);
+        _newY = (_gotoPoint.longitude()*1e7);
+    }
+    else if (direction == "left") {
+        _targetAzimuth -= 90;
+        if (_targetAzimuth < 0) { _targetAzimuth += 360; }
+        _gotoPoint = _currentPoint.atDistanceAndAzimuth(_moveAmount, _targetAzimuth);
+        _newX = (_gotoPoint.latitude()*1e7);
+        _newY = (_gotoPoint.longitude()*1e7);
+    }
+    else if (direction == "back") {
+        _targetAzimuth -= 180;
+        if (_targetAzimuth < 0) { _targetAzimuth += 360; }
+        _gotoPoint = _currentPoint.atDistanceAndAzimuth(_moveAmount, _targetAzimuth);
+        _newX = (_gotoPoint.latitude()*1e7);
+        _newY = (_gotoPoint.longitude()*1e7);
+    }
+
+    qDebug() << "ArduSub plugin setting lateral move this direction: " << _targetAzimuth;
+    qDebug() << "present position: " << _currentPoint.latitude() << " " << _currentPoint.longitude() << " " << _currentAlt;
+    qDebug() << "new position:     " << _newX << " " << _newY << " " << _currentAlt;
+
+    mavlink_message_t msg;
+    mavlink_set_position_target_global_int_t cmd;
+
+    memset(&cmd, 0, sizeof(cmd));
+
+    cmd.target_system = vehicle->id();
+    cmd.target_component = vehicle->defaultComponentId();
+    cmd.coordinate_frame = MAV_FRAME_GLOBAL_RELATIVE_ALT;
+    cmd.type_mask = 0xFFF8; // Only x/y/z valid
+    cmd.lat_int = _newX;
+    cmd.lon_int = _newY;
+    cmd.alt = _currentAlt;
+
+    MAVLinkProtocol* mavlink = qgcApp()->toolbox()->mavlinkProtocol();
+    mavlink_msg_set_position_target_global_int_encode_chan(mavlink->getSystemId(),
+                                                          mavlink->getComponentId(),
+                                                          vehicle->priorityLink()->mavlinkChannel(),
+                                                          &msg,
+                                                          &cmd);
+
+    vehicle->sendMessageOnLink(vehicle->priorityLink(), msg);
+
+
+    /* original NED current-heading version
+
+    float _Xmove = 0.0f;
+    float _Ymove = 0.0f;
+    float _moveAmount = 0.3;
+
+    if (direction == "forward") {
+        _Xmove = _moveAmount;
+        }
+
+    else if (direction == "right") {
+        _Ymove = _moveAmount;
+    }
+    else if (direction == "left") {
+        _Ymove = -(_moveAmount);
+    }
+    else if (direction == "back") {
+        _Xmove = -(_moveAmount);
+    }
+
+
+    qDebug() << "ArduSub plugin setting lateral move " << _moveAmount << " meters this direction: " << direction;
+
+    mavlink_message_t msg;
+    mavlink_set_position_target_local_ned_t cmd;
+
+    memset(&cmd, 0, sizeof(cmd));
+
+    cmd.target_system = vehicle->id();
+    cmd.target_component = vehicle->defaultComponentId();
+    cmd.coordinate_frame = MAV_FRAME_BODY_OFFSET_NED;
+    cmd.type_mask = 0xFFF8; // Only x/y/z valid
+    cmd.x = _Xmove;
+    cmd.y = _Ymove;
+    cmd.z = 0.0f;
+
+    MAVLinkProtocol* mavlink = qgcApp()->toolbox()->mavlinkProtocol();
+    mavlink_msg_set_position_target_local_ned_encode_chan(mavlink->getSystemId(),
+                                                          mavlink->getComponentId(),
+                                                          vehicle->priorityLink()->mavlinkChannel(),
+                                                          &msg,
+                                                          &cmd);
+
+    vehicle->sendMessageOnLink(vehicle->priorityLink(), msg);
+    */
+
 }
 
 

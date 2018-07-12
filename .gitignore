@@ -1,4 +1,5 @@
 libs/lib/Frameworks/GStreamer.framework
+deploy/QGroundControl.AppImage
 *.swp
 *.nfs
 CMakeFiles
